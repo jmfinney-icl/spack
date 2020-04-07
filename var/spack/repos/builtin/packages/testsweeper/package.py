@@ -11,13 +11,15 @@ class Testsweeper(CMakePackage):
     across input parameters."""
 
     homepage = "https://bitbucket.org/icl/testsweeper"
-    url      = "https://bitbucket.org/icl/testsweeper"
+    #url      = "https://bitbucket.org/jfinney10/testsweeper"
+    url = 'https://bitbucket.org/jfinney10/testsweeper/get/tip.tar.bz2'
 
     # notify when the package is updated.
     maintainers = ['jmfinney-icl']
 
     # Add proper versions and checksums here.
     # version('1.2.3', '0123456789abcdef0123456789abcdef')
+    version ('2020.03.11', hg=url)
     version('develop', hg=url)
 
     def cmake_args(self):

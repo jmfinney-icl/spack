@@ -21,36 +21,22 @@ class Slate(Package):
 
     version('develop', hg=hg)
 
-    variant('cuda',   default=True, description='Build with CUDA support.')
-    variant('mpi',    default=True, description='Build with MPI support.')
-    variant('openmp', default=True, description='Build with OpenMP support.')
+    variant('test', default=False, description='Build testing routines')
 
-    depends_on('cuda@9:', when='+cuda')
-    depends_on('intel-mkl')
-    depends_on('mercurial', type='build')
-    depends_on('mpi', when='+mpi')
+    depends_on('cuda@9:')
+    depends_on('mpi')
+    depends_on('blaspp')
+    depends_on('lapackpp')
+    depends_on('testsweeper', when'+test')
 
     conflicts('%gcc@:5')
 
-    def setup_build_environment(self, env):
-        if('+cuda' in self.spec):
-            env.prepend_path('CPATH', self.spec['cuda'].prefix.include)
-        env.prepend_path('CPATH', self.spec['intel-mkl'].prefix.mkl.include)
+    def cmake_args(self):
+        spec = self.spec
+        cmake_args = [
+            '-DSLATE_BUILD_TESTS={}'.format ('ON' if '+test' in spec else 'OFF'),
+            '-DCMAKE_INSTALL_PREFIX=%s' % self.prefix,
+            '-DCMAKE_INSTALL_NAME_DIR:PATH=%s/lib' % self.prefix
+        ]
 
-    def install(self, spec, prefix):
-        f_cuda = "1" if spec.variants['cuda'].value else "0"
-        f_mpi = "1" if spec.variants['mpi'].value else "0"
-        f_openmp = "1" if spec.variants['openmp'].value else "0"
-
-        compiler = 'mpicxx' if spec.variants['mpi'].value else ''
-
-        make('mpi=' + f_mpi, 'mkl=1', 'cuda=' + f_cuda, 'openmp=' + f_openmp,
-             'CXX=' + compiler)
-        install_tree('lib', prefix.lib)
-        install_tree('test', prefix.test)
-        mkdirp(prefix.include)
-        install('include/slate/slate.hh', prefix.include)
-        install('lapack_api/lapack_slate.hh',
-                prefix.include + "/slate_lapack_api.hh")
-        install('scalapack_api/scalapack_slate.hh',
-                prefix.include + "/slate_scalapack_api.hh")
+        return cmake_args
