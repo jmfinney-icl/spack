@@ -27,7 +27,7 @@ class Slate(Package):
     depends_on('mpi')
     depends_on('blaspp')
     depends_on('lapackpp')
-    depends_on('testsweeper', when'+test')
+    depends_on('testsweeper', when='+test')
 
     conflicts('%gcc@:5')
 
